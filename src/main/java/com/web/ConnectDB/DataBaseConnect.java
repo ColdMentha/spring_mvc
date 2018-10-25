@@ -1,47 +1,42 @@
 package com.web.ConnectDB;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataBaseConnect {
-    static private Logger log = Logger.getLogger(DataBaseConnect.class.getName());
-    final private static String driverName = "oracle.jdbc.driver.OracleDriver";
-    private static String url;
-    final private static String server = "localhost";
-    final private static String port = "1521";
-    final private static String sid = "XE";
-    final private static String username = "root";
-    final private static String password = "q1234";
-
-    private static Connection connection;
-    private static boolean isConnected = false;
-
-    private static boolean connect() {
-        try {
-            url = "jdbc:oracle:thin:@" + server + ":" + port + ":" + sid;
-            System.out.println(url);
-            Class.forName(driverName);
-            connection = DriverManager.getConnection(url, username, password);
-            System.out.println("connecting: " + url);
-            if (connection.equals(null))
-                isConnected = false;
-            else
-                isConnected = true;
-        } catch (ClassNotFoundException e) {
-            log.log(Level.WARNING, "ClassNotFoundException", e);
-            isConnected = false;
-        } catch (SQLException e) {
-            log.log(Level.WARNING, "SQLException", e);
-            isConnected = false;
-        }
-        return isConnected;
-    }
 
     public static void main(String[] args) {
-        if (connect()) System.out.println("connected");
-        else System.out.println("not connected");
+        Connection connection;
+        Statement statement;
+        String url = "jdbc:oracle:thin:@localhost:1521:XE";
+        String username = "root";
+        String password = "q1234";
+
+        try {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            connection = DriverManager.getConnection(url,username,password);
+            statement = connection.createStatement();
+            String sql;
+            sql = "SELECT * FROM Person";
+            ResultSet set = statement.executeQuery(sql);
+
+            while (set.next()) {
+                int id = set.getInt("id_person");
+                String last_name = set.getString("last_name");
+                String first_name = set.getString("first_name");
+
+                System.out.println(id + " " + last_name + " " + first_name);
+
+            }
+
+            set.close();
+            statement.close();
+            connection.close();
+
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
